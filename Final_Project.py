@@ -1,7 +1,8 @@
 import numpy as np
-
+import pandas as pd
 
 if __name__ == '__main__':
-    df = np.genfromtxt('persons_heart_data.csv', delimiter=',')
+    df = pd.read_csv('persons_heart_data.csv')
+    labels = df.columns.values
+    df = np.asarray(df)
     print(df)
-    array = np.zeros(2)
