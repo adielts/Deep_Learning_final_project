@@ -59,24 +59,43 @@ def Logistic_Regression(X_train, X_test, Y_train, Y_test):
     logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
     logreg.fit(X_train, Y_train)
     Y_pred = logreg.predict(X_test)
-    accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
-    print("accuracy Logistic Regression: " + str(accuracy_regular_LR))
+    accuracy_Logistic_Regression = metrics.accuracy_score(Y_test, Y_pred)
+    print("accuracy Logistic Regression: " + str(accuracy_Logistic_Regression))
+    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
+    return accuracy_Logistic_Regression
 
 
 def Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test):
     gnb = GaussianNB()
     Y_pred = gnb.fit(X_train, Y_train).predict(X_test)
     accuracy_Gaussian_Naive_Bayes = metrics.accuracy_score(Y_test, Y_pred)
-    print("accuracy Logistic Regression: " + str(accuracy_Gaussian_Naive_Bayes))
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
+    print("accuracy Gaussian Naive Bayes: " + str(accuracy_Gaussian_Naive_Bayes))
+    print("Number of mislabeled points out of a total %d points : %d" %(X_test.shape[0], (Y_test != Y_pred).sum()))
+    return accuracy_Gaussian_Naive_Bayes
 
 
 def Random_Forest(X_train, X_test, Y_train, Y_test):
     rm = RandomForestClassifier(n_estimators=20, oob_score=True, n_jobs=-1, random_state=101, max_features=None,
                                 min_samples_leaf=20)
     rm.fit(X_train, Y_train)
+    Y_pred = rm.predict(X_test)
     acc = rm.score(X_test, Y_test)
     print("accuracy Random Forest: ", acc)
+    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
+    return acc
+
+
+def comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest):
+    # comparing accuracy plot
+    algorithms = ['Logistic Regression', 'Gaussian Naive Bayes', 'Random Forest']
+    accuracies = [accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest]
+    xpos = np.arange(len(algorithms))
+    plt.title("comparing accuracy")
+    plt.xlabel("algorithms")
+    plt.ylabel("accuracies")
+    plt.bar(xpos, accuracies)
+    plt.xticks(xpos, algorithms)
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -88,10 +107,13 @@ if __name__ == '__main__':
     print("best c: " + str(best_c))
 
     # Logistic Regression
-    Logistic_Regression(X_train, X_test, Y_train, Y_test)
+    accuracy_Logistic_Regression = Logistic_Regression(X_train, X_test, Y_train, Y_test)
 
     # Gaussian Naive Bayes
-    Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test)
+    accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test)
 
     # Random Forest
-    Random_Forest(X_train, X_test, Y_train, Y_test)
+    accuracy_Random_Forest = Random_Forest(X_train, X_test, Y_train, Y_test)
+
+    # comparing between algorithms
+    comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
