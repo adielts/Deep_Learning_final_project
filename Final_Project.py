@@ -56,7 +56,11 @@ def best_c(X_train, X_test, Y_train, Y_test):
 
 
 def Logistic_Regression(X_train, X_test, Y_train, Y_test):
-    logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
+    # choose best c
+    c = best_c(X_train, X_test, Y_train, Y_test)
+    print("best c: " + str(c))
+
+    logreg = LogisticRegression(penalty='l2', C=c, max_iter=len(X_train))
     logreg.fit(X_train, Y_train)
     Y_pred = logreg.predict(X_test)
     accuracy_Logistic_Regression = metrics.accuracy_score(Y_test, Y_pred)
@@ -117,18 +121,14 @@ if __name__ == '__main__':
     # load, normalize and split the data
     X_train, X_test, Y_train, Y_test, labels = read_normalize_and_split_data()
 
-    # choose best c
-    best_c = best_c(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
-    print("best c: " + str(best_c))
-
     # Logistic Regression
-    # accuracy_Logistic_Regression = Logistic_Regression(X_train, X_test, Y_train, Y_test)
+    accuracy_Logistic_Regression = Logistic_Regression(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
 
     # Gaussian Naive Bayes
-    # accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test)
+    accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
 
     # Random Forest
-    accuracy_Random_Forest = Random_Forest(X_train, X_test, Y_train, Y_test)
+    accuracy_Random_Forest = Random_Forest(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
 
     # comparing between algorithms
-    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
+    comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
