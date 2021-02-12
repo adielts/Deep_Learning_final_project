@@ -1,10 +1,15 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+
+def random_forest(X_train, X_test, Y_train, Y_test):
+    rm = RandomForestClassifier.fit()
 
 
 # the function choose the parameter of c that produce the best accuracy
@@ -47,15 +52,17 @@ if __name__ == '__main__':
     X = std_scaler.fit_transform(X)
 
     # train test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=5)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.33, random_state=5)
 
     # choose best c
-    best_c = best_c(X_train.copy(), X_test.copy(), y_train.copy(), y_test.copy())
+    best_c = best_c(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
     print("best c: " + str(best_c))
 
     # logistic regression
     logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
-    logreg.fit(X_train, y_train)
+    logreg.fit(X_train, Y_train)
     y_pred = logreg.predict(X_test)
-    accuracy_regular_LR = metrics.accuracy_score(y_test, y_pred)
+    accuracy_regular_LR = metrics.accuracy_score(Y_test, y_pred)
     print(accuracy_regular_LR)
+
+    random_forest(X_train, X_test, Y_train, Y_test)
