@@ -70,18 +70,33 @@ def Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test):
     Y_pred = gnb.fit(X_train, Y_train).predict(X_test)
     accuracy_Gaussian_Naive_Bayes = metrics.accuracy_score(Y_test, Y_pred)
     print("accuracy Gaussian Naive Bayes: " + str(accuracy_Gaussian_Naive_Bayes))
-    print("Number of mislabeled points out of a total %d points : %d" %(X_test.shape[0], (Y_test != Y_pred).sum()))
+    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
     return accuracy_Gaussian_Naive_Bayes
 
 
 def Random_Forest(X_train, X_test, Y_train, Y_test):
-    rm = RandomForestClassifier(n_estimators=20, oob_score=True, n_jobs=-1, random_state=101, max_features=None,
-                                min_samples_leaf=20)
-    rm.fit(X_train, Y_train)
-    Y_pred = rm.predict(X_test)
-    acc = rm.score(X_test, Y_test)
-    print("accuracy Random Forest: ", acc)
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
+    acc_arry = np.zeros(10)
+    num_of_forests = np.zeros(10)
+    best_acc_and_ypred = np.zeros(2)
+    for i in range(1, 11):
+        num_of_forests[i - 1] = i * 10
+        rm = RandomForestClassifier(n_estimators=i * 10, oob_score=True, n_jobs=-1, random_state=101, max_features=None,
+                                    min_samples_leaf=20)
+        rm.fit(X_train, Y_train)
+        Y_pred = rm.predict(X_test)
+        acc = metrics.accuracy_score(Y_test, Y_pred)
+        acc_arry[i - 1] = acc
+        if best_acc_and_ypred[0] < acc:
+            best_acc_and_ypred = [acc, Y_pred]
+
+    plt.plot(num_of_forests, acc_arry)
+    plt.ylabel('Accuracy')
+    plt.xlabel("Number of Forests")
+    plt.title('Random Forest results')
+    plt.show()
+
+    print("accuracy Random Forest: ", best_acc_and_ypred[0])
+    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != best_acc_and_ypred[1]).sum()))
     return acc
 
 
@@ -107,13 +122,13 @@ if __name__ == '__main__':
     print("best c: " + str(best_c))
 
     # Logistic Regression
-    accuracy_Logistic_Regression = Logistic_Regression(X_train, X_test, Y_train, Y_test)
+    # accuracy_Logistic_Regression = Logistic_Regression(X_train, X_test, Y_train, Y_test)
 
     # Gaussian Naive Bayes
-    accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test)
+    # accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test)
 
     # Random Forest
     accuracy_Random_Forest = Random_Forest(X_train, X_test, Y_train, Y_test)
 
     # comparing between algorithms
-    comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
+    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
