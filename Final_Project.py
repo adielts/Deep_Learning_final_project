@@ -1,19 +1,36 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn import metrics
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 
 
 def random_forest(X_train, X_test, Y_train, Y_test):
     rm = RandomForestClassifier.fit()
 
 
+# load, normalize and split the data
+def read_normalize_and_split_data():
+    df = pd.read_csv('persons_heart_data.csv')
+    labels = df.columns.values
+    df = np.asarray(df)
+    X = df[:, :-1]
+    y = df[:, -1:]
+    y = y.flatten()
+    std_scaler = StandardScaler()
+    X = std_scaler.fit_transform(X)
+
+    # train test split
+    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.33, random_state=5)
+
+    return X_train, X_test, Y_train, Y_test, labels
+
+
 # the function choose the parameter of c that produce the best accuracy
-def best_c(X_train, X_test, y_train, y_test):
+def best_c(X_train, X_test, Y_train, Y_test):
     max_accuracy = 0
     max_accuracy_c = 0
     accuracy_arr = []
@@ -21,9 +38,9 @@ def best_c(X_train, X_test, y_train, y_test):
     for i in range(-3, 5):
         logreg = LogisticRegression(penalty='l2', C=10 ** i, max_iter=len(X_train))
         c_arr.append(10 ** i)
-        logreg.fit(X_train, y_train)
-        y_pred = logreg.predict(X_test)
-        accuracy = metrics.accuracy_score(y_test, y_pred)
+        logreg.fit(X_train, Y_train)
+        Y_pred = logreg.predict(X_test)
+        accuracy = metrics.accuracy_score(Y_test, Y_pred)
         if accuracy > max_accuracy:
             max_accuracy = accuracy
             max_accuracy_c = 10 ** i
@@ -40,19 +57,8 @@ def best_c(X_train, X_test, y_train, y_test):
 
 
 if __name__ == '__main__':
-    # load and normalize the data
-    df = pd.read_csv('persons_heart_data.csv')
-    labels = df.columns.values
-    df = np.asarray(df)
-    print(df)
-    X = df[:, :-1]
-    y = df[:, -1:]
-    y = y.flatten()
-    std_scaler = StandardScaler()
-    X = std_scaler.fit_transform(X)
-
-    # train test split
-    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.33, random_state=5)
+    # load, normalize and split the data
+    X_train, X_test, Y_train, Y_test, labels = read_normalize_and_split_data()
 
     # choose best c
     best_c = best_c(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
@@ -61,8 +67,8 @@ if __name__ == '__main__':
     # logistic regression
     logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
     logreg.fit(X_train, Y_train)
-    y_pred = logreg.predict(X_test)
-    accuracy_regular_LR = metrics.accuracy_score(Y_test, y_pred)
+    Y_pred = logreg.predict(X_test)
+    accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
     print(accuracy_regular_LR)
 
     random_forest(X_train, X_test, Y_train, Y_test)
