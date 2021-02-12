@@ -58,15 +58,15 @@ def Logistic_Regression(X_train, X_test, Y_train, Y_test):
     logreg.fit(X_train, Y_train)
     Y_pred = logreg.predict(X_test)
     accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
-    print(accuracy_regular_LR)
+    print("accuracy Logistic Regression: " + str(accuracy_regular_LR))
 
 
 def Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test):
     gnb = GaussianNB()
     Y_pred = gnb.fit(X_train, Y_train).predict(X_test)
-    print("Number of mislabeled points out of a total %d points : %d" %(X_test.shape[0], (Y_test != Y_pred).sum()))
     accuracy_Gaussian_Naive_Bayes = metrics.accuracy_score(Y_test, Y_pred)
-    print(accuracy_Gaussian_Naive_Bayes)
+    print("accuracy Logistic Regression: " + str(accuracy_Gaussian_Naive_Bayes))
+    print("Number of mislabeled points out of a total %d points : %d" %(X_test.shape[0], (Y_test != Y_pred).sum()))
 
 
 def Random_Forest(X_train, X_test, Y_train, Y_test):
@@ -74,7 +74,7 @@ def Random_Forest(X_train, X_test, Y_train, Y_test):
                                 min_samples_leaf=20)
     rm.fit(X_train, Y_train)
     acc = rm.score(X_test, Y_test)
-    print('Random Forest: ', acc)
+    print("accuracy Random Forest: ", acc)
 
 
 if __name__ == '__main__':
