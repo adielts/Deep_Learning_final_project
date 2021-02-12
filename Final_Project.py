@@ -29,7 +29,7 @@ def best_c(X_train, X_test, y_train, y_test):
     plt.title("comparing c")
     plt.xlabel("c")
     plt.ylabel("accuracies")
-    plt.show()
+    # plt.show()
 
     return max_accuracy_c
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     X = std_scaler.fit_transform(X)
 
     # train test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=5)
 
     # choose best c
     best_c = best_c(X_train.copy(), X_test.copy(), y_train.copy(), y_test.copy())
