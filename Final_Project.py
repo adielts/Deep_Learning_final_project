@@ -1,15 +1,19 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn import metrics
-from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 def random_forest(X_train, X_test, Y_train, Y_test):
-    rm = RandomForestClassifier.fit()
+    rm = RandomForestClassifier(n_estimators=20, oob_score=True, n_jobs=-1, random_state=101, max_features=None,
+                                min_samples_leaf=20)
+    rm.fit(X_train, Y_train)
+    acc = rm.score(X_test, Y_test)
+    print('Random Forest: ', acc)
 
 
 # load, normalize and split the data
@@ -64,11 +68,11 @@ if __name__ == '__main__':
     best_c = best_c(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
     print("best c: " + str(best_c))
 
-    # logistic regression
-    logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
-    logreg.fit(X_train, Y_train)
-    Y_pred = logreg.predict(X_test)
-    accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
-    print(accuracy_regular_LR)
+    # # logistic regression
+    # logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
+    # logreg.fit(X_train, Y_train)
+    # Y_pred = logreg.predict(X_test)
+    # accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
+    # print(accuracy_regular_LR)
 
     random_forest(X_train, X_test, Y_train, Y_test)
