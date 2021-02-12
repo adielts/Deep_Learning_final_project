@@ -6,14 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-
-
-def random_forest(X_train, X_test, Y_train, Y_test):
-    rm = RandomForestClassifier(n_estimators=20, oob_score=True, n_jobs=-1, random_state=101, max_features=None,
-                                min_samples_leaf=20)
-    rm.fit(X_train, Y_train)
-    acc = rm.score(X_test, Y_test)
-    print('Random Forest: ', acc)
+from sklearn.naive_bayes import GaussianNB
 
 
 # load, normalize and split the data
@@ -60,6 +53,30 @@ def best_c(X_train, X_test, Y_train, Y_test):
     return max_accuracy_c
 
 
+def Logistic_Regression(X_train, X_test, Y_train, Y_test):
+    logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
+    logreg.fit(X_train, Y_train)
+    Y_pred = logreg.predict(X_test)
+    accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
+    print(accuracy_regular_LR)
+
+
+def Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test):
+    gnb = GaussianNB()
+    Y_pred = gnb.fit(X_train, Y_train).predict(X_test)
+    print("Number of mislabeled points out of a total %d points : %d" %(X_test.shape[0], (Y_test != Y_pred).sum()))
+    accuracy_Gaussian_Naive_Bayes = metrics.accuracy_score(Y_test, Y_pred)
+    print(accuracy_Gaussian_Naive_Bayes)
+
+
+def Random_Forest(X_train, X_test, Y_train, Y_test):
+    rm = RandomForestClassifier(n_estimators=20, oob_score=True, n_jobs=-1, random_state=101, max_features=None,
+                                min_samples_leaf=20)
+    rm.fit(X_train, Y_train)
+    acc = rm.score(X_test, Y_test)
+    print('Random Forest: ', acc)
+
+
 if __name__ == '__main__':
     # load, normalize and split the data
     X_train, X_test, Y_train, Y_test, labels = read_normalize_and_split_data()
@@ -68,11 +85,11 @@ if __name__ == '__main__':
     best_c = best_c(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
     print("best c: " + str(best_c))
 
-    # # logistic regression
-    # logreg = LogisticRegression(penalty='l2', C=best_c, max_iter=len(X_train))
-    # logreg.fit(X_train, Y_train)
-    # Y_pred = logreg.predict(X_test)
-    # accuracy_regular_LR = metrics.accuracy_score(Y_test, Y_pred)
-    # print(accuracy_regular_LR)
+    # Logistic Regression
+    Logistic_Regression(X_train, X_test, Y_train, Y_test)
 
-    random_forest(X_train, X_test, Y_train, Y_test)
+    # Gaussian Naive Bayes
+    Gaussian_Naive_Bayes(X_train, X_test, Y_train, Y_test)
+
+    # Random Forest
+    Random_Forest(X_train, X_test, Y_train, Y_test)
