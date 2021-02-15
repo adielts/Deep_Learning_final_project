@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sn
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -66,6 +67,7 @@ def Logistic_Regression(X_train, X_test, Y_train, Y_test):
     accuracy_Logistic_Regression = metrics.accuracy_score(Y_test, Y_pred)
     print("accuracy Logistic Regression: " + str(accuracy_Logistic_Regression))
     print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
+    build_confusion_matrix(Y_test, Y_pred)
     return accuracy_Logistic_Regression
 
 
@@ -97,10 +99,10 @@ def Random_Forest(X_train, X_test, Y_train, Y_test):
     plt.ylabel('Accuracy')
     plt.xlabel("Number of Forests")
     plt.title('Random Forest results')
-    plt.show()
-
     print("accuracy Random Forest: ", best_acc_and_ypred[0])
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != best_acc_and_ypred[1]).sum()))
+    print("Number of mislabeled points out of a total %d points : %d" % (
+        X_test.shape[0], (Y_test != best_acc_and_ypred[1]).sum()))
+    plt.show()
     return acc
 
 
@@ -114,6 +116,19 @@ def comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_B
     plt.ylabel("accuracies")
     plt.bar(xpos, accuracies)
     plt.xticks(xpos, algorithms)
+    plt.show()
+
+
+def build_confusion_matrix(Y_test, Y_pred):
+    confusion_matrix = np.zeros((2, 2))
+    Y_test = Y_test.astype(np.int64)
+    Y_pred = Y_pred.astype(np.int64)
+    for i in range(len(Y_test)):
+        confusion_matrix[Y_test[i]][Y_pred[i]] += 1
+    sn.heatmap(confusion_matrix, annot=True, xticklabels=np.arange(2), yticklabels=np.arange(2))
+    plt.xlabel('Predict')
+    plt.ylabel('Actual')
+    plt.title('Logistic Regression\'s confusion matrix')
     plt.show()
 
 
