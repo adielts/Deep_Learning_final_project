@@ -39,7 +39,7 @@ def best_c(X_train, X_val, Y_train, Y_val):
     accuracy_arr = np.zeros(8)
     c_arr = np.zeros(8)
     for i in range(-3, 5):
-        model = LogisticRegression(penalty='l2', C=10 ** i, max_iter=len(X_train))
+        model = LogisticRegression(penalty='l1',solver='saga', C=10 ** i, max_iter=len(X_train))
         c_arr[i + 3] = 10 ** i
         model.fit(X_train, Y_train)
         Y_pred = model.predict(X_val)
@@ -66,7 +66,7 @@ def Logistic_Regression(X_train, X_val, X_test, Y_train, Y_val, Y_test, X_train_
     c = best_c(X_train, X_val, Y_train, Y_val)
     print("best c: " + str(c))
 
-    logreg = LogisticRegression(penalty='l2', C=c, max_iter=len(X_train_val))
+    logreg = LogisticRegression(penalty='l1',solver='saga', C=c, max_iter=len(X_train_val))
     logreg.fit(X_train_val, Y_train_val)
     Y_pred = logreg.predict(X_test)
     accuracy_Logistic_Regression = metrics.accuracy_score(Y_test, Y_pred)
@@ -187,20 +187,20 @@ if __name__ == '__main__':
                                                        X_train_validation.copy(), Y_train_validation.copy())
 
     # Gaussian Naive Bayes
-    accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train_validation.copy(), X_test.copy(),
-                                                         Y_train_validation.copy(), Y_test.copy())
+    # accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train_validation.copy(), X_test.copy(),
+    #                                                      Y_train_validation.copy(), Y_test.copy())
 
     # Random Forest
-    accuracy_Random_Forest = Random_Forest(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
-                                           Y_test.copy())
+    # accuracy_Random_Forest = Random_Forest(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
+    #                                        Y_test.copy())
 
     # Support Vector Classification
-    accuracy_SVC = Support_Vector_Classification(X_train.copy(), X_validation.copy(), X_test.copy(),
-                                                 Y_train.copy(), Y_validation.copy(), Y_test.copy(),
-                                                 X_train_validation.copy(), Y_train_validation.copy())
+    # accuracy_SVC = Support_Vector_Classification(X_train.copy(), X_validation.copy(), X_test.copy(),
+    #                                              Y_train.copy(), Y_validation.copy(), Y_test.copy(),
+    #                                              X_train_validation.copy(), Y_train_validation.copy())
 
     # comparing between algorithms
-    comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
+    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
 
     # AdaBoost
     # accuracy_AdaBoost = AdaBoost(X_train.copy(), X_test.copy(), Y_train.copy(), Y_test.copy())
