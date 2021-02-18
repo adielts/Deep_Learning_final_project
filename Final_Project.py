@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+import itertools
 from sklearn.feature_selection import RFE
 from sklearn.feature_selection import SelectKBest
 
@@ -18,6 +19,7 @@ from sklearn.feature_selection import SelectKBest
 def read_normalize_and_split_data():
     df = pd.read_csv('persons_heart_data.csv')
     labels = df.columns.values
+    labels = np.delete(labels, len(labels)-1, 0)
     df = np.asarray(df)
     X = df[:, :-1]
     y = df[:, -1:]
@@ -214,6 +216,50 @@ def build_confusion_matrix(Y_test, Y_pred, title):
     plt.show()
 
 
+def filter_feateres_from_X(X_train_validation, X_test, set):
+    filtered_X_train_validation = [[0]]*len(X_train_validation)
+    filtered_X_test = [[0]] * len(X_test)
+    for index in set:
+        filtered_X_train_validation = np.hstack((filtered_X_train_validation, X_train_validation[:, index:index+1]))
+        filtered_X_test = np.hstack((filtered_X_test, X_test[:, index:index + 1]))
+    filtered_X_train_validation = np.delete(filtered_X_train_validation, 0, 1)
+    filtered_X_test = np.delete(filtered_X_test, 0, 1)
+    return filtered_X_train_validation, filtered_X_test
+
+
+def findsubsets(array, subsetSize):
+    return list(itertools.combinations(array, subsetSize))
+
+
+def best_subset_features(X_train_validation, X_test, Y_train_validation, Y_test, labels):
+    features = np.arange(len(labels))
+    accuracies = []
+    global_max_accuracy_sets = []
+    for i in range(1, len(features)+1):
+        max_accuracy = 0
+        max_accuracy_set = ()
+        sets = findsubsets(features, i)
+        for set in sets:
+            filtered_X_train_validation, filtered_X_test = filter_feateres_from_X(X_train_validation.copy(), X_test.copy(), set)
+            accuracy_Random_Forest = Random_Forest(filtered_X_train_validation, filtered_X_test, Y_train_validation, Y_test)
+            if accuracy_Random_Forest > max_accuracy:
+                max_accuracy = accuracy_Random_Forest
+                max_accuracy_set = set
+        accuracies.append(max_accuracy)
+        global_max_accuracy_sets.append(max_accuracy_set)
+    print(accuracies)
+    print(global_max_accuracy_sets)
+    print("the best subset features: " + str(global_max_accuracy_sets[np.argmax(accuracies)]))
+    print("the accuracy of the best subset features:", max(accuracies))
+
+    plt.plot(np.arange(len(features)+1, 1, -1), np.flip(accuracies))
+    plt.gca().invert_xaxis()
+    plt.ylabel('Accuracy')
+    plt.xlabel("number of features")
+    plt.title('Accuracy depends number of features')
+    plt.show()
+
+
 if __name__ == '__main__':
     # load, normalize and split the data
     X_train, X_validation, X_test, Y_train, Y_validation, Y_test, X_train_validation, Y_train_validation, labels = read_normalize_and_split_data()
@@ -240,11 +286,14 @@ if __name__ == '__main__':
     #                              Y_test.copy())
 
     # comparing between algorithms
-    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest)
+    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
 
     # RFE
     # RFE_alg(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(), Y_test.copy())
 
     # Select best K features
-    select_best_k(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
-                  Y_test.copy())
+    # select_best_k(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
+    #               Y_test.copy())
+
+    best_subset_features(X_train_validation.copy(), X_test.copy(),
+                         Y_train_validation.copy(), Y_test.copy(), labels)
