@@ -185,7 +185,7 @@ def plot_graph_acc_vs_n_fetures(X_values, Y_values, title):
     plt.plot(X_values, Y_values)
     plt.gca().invert_xaxis()
     plt.ylabel('Accuracy')
-    plt.xlabel("Number of featurs")
+    plt.xlabel("Number of features")
     plt.title(title)
     plt.show()
 
@@ -247,17 +247,9 @@ def best_subset_features(X_train_validation, X_test, Y_train_validation, Y_test,
                 max_accuracy_set = set
         accuracies.append(max_accuracy)
         global_max_accuracy_sets.append(max_accuracy_set)
-    print(accuracies)
-    print(global_max_accuracy_sets)
     print("the best subset features: " + str(global_max_accuracy_sets[np.argmax(accuracies)]))
     print("the accuracy of the best subset features:", max(accuracies))
-
-    plt.plot(np.arange(len(features)+1, 1, -1), np.flip(accuracies))
-    plt.gca().invert_xaxis()
-    plt.ylabel('Accuracy')
-    plt.xlabel("number of features")
-    plt.title('Accuracy depends number of features')
-    plt.show()
+    plot_graph_acc_vs_n_fetures(np.arange(len(features), 0, -1), np.flip(accuracies), 'subset features')
 
 
 if __name__ == '__main__':
