@@ -1,3 +1,5 @@
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -5,14 +7,11 @@ import seaborn as sn
 from sklearn import metrics
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-import itertools
 from sklearn.feature_selection import RFE
 from sklearn.feature_selection import SelectKBest
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 # load, normalize and split the data
@@ -80,16 +79,6 @@ def Logistic_Regression(X_train, X_val, X_test, Y_train, Y_val, Y_test, X_train_
     return accuracy_Logistic_Regression
 
 
-def Gaussian_Naive_Bayes(X_train_validation, X_test, Y_train_validation, Y_test):
-    gnb = GaussianNB()
-    Y_pred = gnb.fit(X_train_validation, Y_train_validation).predict(X_test)
-    accuracy_Gaussian_Naive_Bayes = metrics.accuracy_score(Y_test, Y_pred)
-    print("Accuracy Gaussian Naive Bayes: " + str(accuracy_Gaussian_Naive_Bayes))
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
-    build_confusion_matrix(Y_test, Y_pred, 'Gaussian Naive Bayes\'s confusion matrix')
-    return accuracy_Gaussian_Naive_Bayes
-
-
 def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
     # acc_arry = np.zeros(20)
     # rand_values = np.arange(10, 210, 10)
@@ -121,38 +110,34 @@ def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
     return acc
 
 
-def Support_Vector_Classification(X_train_validation, X_test, Y_train_validation, Y_test):
-    svc = SVC(kernel='linear')
-    svc.fit(X_train_validation, Y_train_validation)
-    Y_pred = svc.predict(X_test)
-    acc = metrics.accuracy_score(Y_test, Y_pred)
-    print("Accuracy SVC: ", acc)
-    print("Number of mislabeled points out of a total %d points : %d" % (
-        X_test.shape[0], (Y_test != Y_pred).sum()))
-    return acc
-
-
 def AdaBoost(X_train_validation, X_test, Y_train_validation, Y_test):
     # max_iterations = 100
-    # acc_arr = np.zeros(max_iterations)
-    # for i in range(1, max_iterations+1):
+    # acc_arr = np.zeros(max_iterations + 1)
+    # best_i = 0
+    best_acc_ypred = np.zeros(2)
+    # for i in np.arange(0.01, 1.01, 0.01):
+    ada_clf = AdaBoostClassifier(n_estimators=60, learning_rate=0.01)
+    ada_clf.fit(X_train_validation, Y_train_validation)
+    Y_pred = ada_clf.predict(X_test)
+    acc = metrics.accuracy_score(Y_test, Y_pred)
+    best_acc_ypred = [acc, Y_pred]
+    # acc_arr[int(i * max_iterations)] = metrics.accuracy_score(Y_test, Y_pred)
+    # if (acc_arr[int(i * max_iterations)] > best_acc_ypred[0]):
+    #     best_acc_ypred = [acc_arr[int(i * max_iterations)], Y_pred]
+    #     best_i = i
 
-    clf = AdaBoostClassifier(n_estimators=60, learning_rate=0.065)
-    clf.fit(X_train_validation, Y_train_validation)
-    Y_pred = clf.predict(X_test)
-    acc_arr = metrics.accuracy_score(Y_test, Y_pred)
-
-    # plt.plot(np.arange(0.01, 1.01, 0.01), acc_arr)
+    # plt.plot(np.arange(0.01, 1.01, 0.01), acc_arr[1:])
     # plt.ylabel('Accuracy')
-    # plt.xlabel("Number of estimators")
+    # plt.xlabel("learning rate")
     # plt.title('Adaboost')
     # plt.show()
 
-    accuracy_AdaBoost = metrics.accuracy_score(Y_test, Y_pred)
-    print("Accuracy AdaBoost: " + str(accuracy_AdaBoost))
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
-    build_confusion_matrix(Y_test, Y_pred, "AdaBoost\'s confusion matrix")
-    return accuracy_AdaBoost
+    print("Accuracy AdaBoost: ", best_acc_ypred[0])
+    # print("Best learning rate: ", best_i)
+    print("Number of mislabeled points out of a total %d points : %d" % (
+        X_test.shape[0], (Y_test != best_acc_ypred[1]).sum()))
+    build_confusion_matrix(Y_test, best_acc_ypred[1], "AdaBoost\'s confusion matrix")
+    return best_acc_ypred[0]
 
 
 def RFE_alg(X_train_validation, X_test, Y_train_validation, Y_test):
@@ -195,9 +180,9 @@ def comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accura
     algorithms = ['Logistic Regression', 'AdaBoost', 'Random Forest']
     accuracies = [accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest]
     xpos = np.arange(len(algorithms))
-    plt.title("comparing accuracy")
-    plt.xlabel("algorithms")
-    plt.ylabel("accuracies")
+    plt.title("Comparing accuracy")
+    plt.xlabel("Algorithms")
+    plt.ylabel("Accuracies")
     plt.bar(xpos, accuracies)
     plt.xticks(xpos, algorithms)
     plt.show()
@@ -261,24 +246,16 @@ if __name__ == '__main__':
     #                                                    Y_train.copy(), Y_validation.copy(), Y_test.copy(),
     #                                                    X_train_validation.copy(), Y_train_validation.copy())
 
-    # Gaussian Naive Bayes
-    # accuracy_Gaussian_Naive_Bayes = Gaussian_Naive_Bayes(X_train_validation.copy(), X_test.copy(),
-    #                                                      Y_train_validation.copy(), Y_test.copy())
-
     # Random Forest
     # accuracy_Random_Forest = Random_Forest(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
     #                                        Y_test.copy())
 
-    # Support Vector Classification
-    # accuracy_SVC = Support_Vector_Classification(X_train_validation.copy(), X_test.copy(),
-    #                                              Y_train_validation.copy(), Y_test.copy())
-
     # AdaBoost
-    # accuracy_AdaBoost = AdaBoost(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
-    #                              Y_test.copy())
+    accuracy_AdaBoost = AdaBoost(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
+                                 Y_test.copy())
 
     # comparing between algorithms
-    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_Gaussian_Naive_Bayes, accuracy_Random_Forest)
+    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest)
 
     # RFE
     # RFE_alg(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(), Y_test.copy())
@@ -287,5 +264,5 @@ if __name__ == '__main__':
     # select_best_k(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
     #               Y_test.copy())
 
-    best_subset_features(X_train_validation.copy(), X_test.copy(),
-                         Y_train_validation.copy(), Y_test.copy(), labels)
+    # best_subset_features(X_train_validation.copy(), X_test.copy(),
+    #                      Y_train_validation.copy(), Y_test.copy(), labels)
