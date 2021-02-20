@@ -111,28 +111,31 @@ def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
 
 
 def AdaBoost(X_train_validation, X_test, Y_train_validation, Y_test):
-    max_iterations = 100
-    acc_arr = np.zeros(max_iterations + 1)
+    # max_iterations = 100
+    # acc_arr = np.zeros(max_iterations + 1)
+    # best_i = 0
     best_acc_ypred = np.zeros(2)
-    best_i = 0
-    for i in np.arange(0.01, 1.01, 0.01):
-        ada_clf = AdaBoostClassifier(n_estimators=60, learning_rate=i)
-        ada_clf.fit(X_train_validation, Y_train_validation)
-        Y_pred = ada_clf.predict(X_test)
-        acc_arr[int(i * max_iterations)] = metrics.accuracy_score(Y_test, Y_pred)
-        if (acc_arr[int(i * max_iterations)] > best_acc_ypred[0]):
-            best_acc_ypred = [acc_arr[int(i * max_iterations)], Y_pred]
-            best_i = i
+    # for i in np.arange(0.01, 1.01, 0.01):
+    ada_clf = AdaBoostClassifier(n_estimators=60, learning_rate=0.01)
+    ada_clf.fit(X_train_validation, Y_train_validation)
+    Y_pred = ada_clf.predict(X_test)
+    acc = metrics.accuracy_score(Y_test, Y_pred)
+    best_acc_ypred = [acc, Y_pred]
+    # acc_arr[int(i * max_iterations)] = metrics.accuracy_score(Y_test, Y_pred)
+    # if (acc_arr[int(i * max_iterations)] > best_acc_ypred[0]):
+    #     best_acc_ypred = [acc_arr[int(i * max_iterations)], Y_pred]
+    #     best_i = i
 
-    plt.plot(np.arange(0.01, 1.01, 0.01), acc_arr[1:])
-    plt.ylabel('Accuracy')
-    plt.xlabel("learning rate")
-    plt.title('Adaboost')
-    plt.show()
+    # plt.plot(np.arange(0.01, 1.01, 0.01), acc_arr[1:])
+    # plt.ylabel('Accuracy')
+    # plt.xlabel("learning rate")
+    # plt.title('Adaboost')
+    # plt.show()
 
     print("Accuracy AdaBoost: ", best_acc_ypred[0])
-    print("Best learning rate: ", best_i)
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != best_acc_ypred[1]).sum()))
+    # print("Best learning rate: ", best_i)
+    print("Number of mislabeled points out of a total %d points : %d" % (
+        X_test.shape[0], (Y_test != best_acc_ypred[1]).sum()))
     build_confusion_matrix(Y_test, best_acc_ypred[1], "AdaBoost\'s confusion matrix")
     return best_acc_ypred[0]
 
@@ -177,9 +180,9 @@ def comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accura
     algorithms = ['Logistic Regression', 'AdaBoost', 'Random Forest']
     accuracies = [accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest]
     xpos = np.arange(len(algorithms))
-    plt.title("comparing accuracy")
-    plt.xlabel("algorithms")
-    plt.ylabel("accuracies")
+    plt.title("Comparing accuracy")
+    plt.xlabel("Algorithms")
+    plt.ylabel("Accuracies")
     plt.bar(xpos, accuracies)
     plt.xticks(xpos, algorithms)
     plt.show()
