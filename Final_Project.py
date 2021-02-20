@@ -158,12 +158,12 @@ def AdaBoost(X_train_validation, X_test, Y_train_validation, Y_test):
 def RFE_alg(X_train_validation, X_test, Y_train_validation, Y_test):
     acc_arr = np.zeros(np.shape(X_train_validation)[1] + 1)
     for i in range(np.shape(X_train_validation)[1], 1, -1):
-        rfecv = RFE(RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=106, max_features=None,
-                                           min_samples_leaf=20), n_features_to_select=i)
-        rfecv.fit(X_train_validation, Y_train_validation)
-        print('RFE ranking (', i, '):', rfecv.ranking_)
-        rfecv.fit(X_train_validation[:, np.argsort(rfecv.ranking_)[:i]], Y_train_validation)
-        score = rfecv.score(X_test[:, np.argsort(rfecv.ranking_)[:i]], Y_test)
+        rfe = RFE(RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=106, max_features=None,
+                                         min_samples_leaf=20), n_features_to_select=i)
+        rfe.fit(X_train_validation, Y_train_validation)
+        print('RFE ranking (', i, '):', rfe.ranking_)
+        rfe.fit(X_train_validation[:, np.argsort(rfe.ranking_)[:i]], Y_train_validation)
+        score = rfe.score(X_test[:, np.argsort(rfe.ranking_)[:i]], Y_test)
         print('Accuracy RFE is: ', score)
         acc_arr[i] = score
     acc_arr = acc_arr[2:]
