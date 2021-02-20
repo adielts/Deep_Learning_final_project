@@ -241,20 +241,20 @@ if __name__ == '__main__':
     X_train, X_validation, X_test, Y_train, Y_validation, Y_test, X_train_validation, Y_train_validation, labels = read_normalize_and_split_data()
 
     # Logistic Regression
-    # accuracy_Logistic_Regression = Logistic_Regression(X_train.copy(), X_validation.copy(), X_test.copy(),
-    #                                                    Y_train.copy(), Y_validation.copy(), Y_test.copy(),
-    #                                                    X_train_validation.copy(), Y_train_validation.copy())
+    accuracy_Logistic_Regression = Logistic_Regression(X_train.copy(), X_validation.copy(), X_test.copy(),
+                                                       Y_train.copy(), Y_validation.copy(), Y_test.copy(),
+                                                       X_train_validation.copy(), Y_train_validation.copy())
 
     # Random Forest
-    # accuracy_Random_Forest = Random_Forest(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
-    #                                        Y_test.copy())
+    accuracy_Random_Forest = Random_Forest(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
+                                           Y_test.copy())
 
     # AdaBoost
     accuracy_AdaBoost = AdaBoost(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
                                  Y_test.copy())
 
     # comparing between algorithms
-    # comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest)
+    comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest)
 
     # RFE
     # RFE_alg(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(), Y_test.copy())
