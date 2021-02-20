@@ -79,16 +79,6 @@ def Logistic_Regression(X_train, X_val, X_test, Y_train, Y_val, Y_test, X_train_
     return accuracy_Logistic_Regression
 
 
-def Gaussian_Naive_Bayes(X_train_validation, X_test, Y_train_validation, Y_test):
-    gnb = GaussianNB()
-    Y_pred = gnb.fit(X_train_validation, Y_train_validation).predict(X_test)
-    accuracy_Gaussian_Naive_Bayes = metrics.accuracy_score(Y_test, Y_pred)
-    print("Accuracy Gaussian Naive Bayes: " + str(accuracy_Gaussian_Naive_Bayes))
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
-    build_confusion_matrix(Y_test, Y_pred, 'Gaussian Naive Bayes\'s confusion matrix')
-    return accuracy_Gaussian_Naive_Bayes
-
-
 def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
     # acc_arry = np.zeros(20)
     # rand_values = np.arange(10, 210, 10)
@@ -117,17 +107,6 @@ def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
     print("Number of mislabeled points out of a total %d points : %d" % (
         X_test.shape[0], (Y_test != Y_pred).sum()))
     # build_confusion_matrix(Y_test, Y_pred, 'Random Forest confusion matrix')
-    return acc
-
-
-def Support_Vector_Classification(X_train_validation, X_test, Y_train_validation, Y_test):
-    svc = SVC(kernel='linear')
-    svc.fit(X_train_validation, Y_train_validation)
-    Y_pred = svc.predict(X_test)
-    acc = metrics.accuracy_score(Y_test, Y_pred)
-    print("Accuracy SVC: ", acc)
-    print("Number of mislabeled points out of a total %d points : %d" % (
-        X_test.shape[0], (Y_test != Y_pred).sum()))
     return acc
 
 
