@@ -7,7 +7,7 @@ from sklearn import metrics
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE
-from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import mutual_info_classif
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 def read_normalize_and_split_data():
     df = pd.read_csv('persons_heart_data.csv')
     labels = df.columns.values
-    labels = np.delete(labels, len(labels)-1, 0)
+    labels = np.delete(labels, len(labels) - 1, 0)
     df = np.asarray(df)
     X = df[:, :-1]
     y = df[:, -1:]
@@ -73,12 +73,12 @@ def Logistic_Regression(X_train, X_val, X_test, Y_train, Y_val, Y_test, X_train_
     Y_pred = logreg.predict(X_test)
     accuracy_Logistic_Regression = metrics.accuracy_score(Y_test, Y_pred)
     print("Accuracy Logistic Regression: " + str(accuracy_Logistic_Regression))
-    print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != Y_pred).sum()))
+    print("Number of mislabeled points out of a total %d points : %d\n" % (X_test.shape[0], (Y_test != Y_pred).sum()))
     build_confusion_matrix(Y_test, Y_pred, "Logistic Regression\'s confusion matrix")
     return accuracy_Logistic_Regression
 
 
-def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
+def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test, plot_heat_map=True):
     # acc_arry = np.zeros(20)
     # rand_values = np.arange(10, 210, 10)
     best_acc_and_ypred = np.array(2)
@@ -103,9 +103,9 @@ def Random_Forest(X_train_validation, X_test, Y_train_validation, Y_test):
     # plt.title('Random Forest results')
     # plt.show()
     print("Accuracy Random Forest: ", acc)
-    print("Number of mislabeled points out of a total %d points : %d" % (
+    print("Number of mislabeled points out of a total %d points : %d\n" % (
         X_test.shape[0], (Y_test != Y_pred).sum()))
-    # build_confusion_matrix(Y_test, Y_pred, 'Random Forest confusion matrix')
+    if plot_heat_map: build_confusion_matrix(Y_test, Y_pred, 'Random Forest confusion matrix')
     return acc
 
 
@@ -133,7 +133,7 @@ def AdaBoost(X_train_validation, X_test, Y_train_validation, Y_test):
 
     print("Accuracy AdaBoost: ", best_acc_ypred[0])
     # print("Best learning rate: ", best_i)
-    print("Number of mislabeled points out of a total %d points : %d" % (
+    print("Number of mislabeled points out of a total %d points : %d\n" % (
         X_test.shape[0], (Y_test != best_acc_ypred[1]).sum()))
     build_confusion_matrix(Y_test, best_acc_ypred[1], "AdaBoost\'s confusion matrix")
     return best_acc_ypred[0]
@@ -154,15 +154,19 @@ def RFE_alg(X_train_validation, X_test, Y_train_validation, Y_test):
     plot_graph_acc_vs_n_fetures(np.arange(13, 1, -1), np.flip(acc_arr), 'RFE')
 
 
-def select_best_k(X_train_validation, X_test, Y_train_validation, Y_test):
+def mutual_information_alg(X_train_validation, X_test, Y_train_validation, Y_test):
+    print('\n','Running Mutual information select featurs algorithm...')
+    discrete_feature_mask = [True, True, True, True, True, True, True, True, True, False, True, True, True]
+    mi = mutual_info_classif(X_train_validation, Y_train_validation, discrete_features=discrete_feature_mask,
+                             n_neighbors=1, copy=True)
+    max_rank_indexes = np.argsort(-mi)
+    print(max_rank_indexes)
     acc_arr = np.zeros(np.shape(X_train_validation)[1] + 1)
     for number_of_featurs in range(13, 0, -1):
-        print('*** run RF with best', number_of_featurs, 'selected featurs ***')
-        k_best = SelectKBest(k=number_of_featurs).fit(X_train_validation, Y_train_validation)
-        max_rank_indexes = np.argsort(-k_best.scores_)[:number_of_featurs]
-        acc_arr[number_of_featurs] = Random_Forest(X_train_validation[:, max_rank_indexes], X_test[:, max_rank_indexes],
-                                                   Y_train_validation, Y_test)
-    plot_graph_acc_vs_n_fetures(np.arange(13, 0, -1), np.flip(acc_arr[1:]), 'Select K-Best')
+        acc_arr[number_of_featurs] = Random_Forest(X_train_validation[:, max_rank_indexes[:number_of_featurs]],
+                                                   X_test[:, max_rank_indexes[:number_of_featurs]],
+                                                   Y_train_validation, Y_test, False)
+    plot_graph_acc_vs_n_fetures(np.arange(13, 0, -1), np.flip(acc_arr[1:]), 'Mutual information featurs selection')
 
 
 def plot_graph_acc_vs_n_fetures(X_values, Y_values, title):
@@ -178,11 +182,12 @@ def comparing_algorithms(accuracy_Logistic_Regression, accuracy_AdaBoost, accura
     # comparing accuracy plot
     algorithms = ['Logistic Regression', 'AdaBoost', 'Random Forest']
     accuracies = [accuracy_Logistic_Regression, accuracy_AdaBoost, accuracy_Random_Forest]
+    clrs = ['blue' if (x < max(accuracies)) else 'orange' for x in accuracies]
     xpos = np.arange(len(algorithms))
     plt.title("Comparing accuracy")
     plt.xlabel("Algorithms")
     plt.ylabel("Accuracies")
-    plt.bar(xpos, accuracies)
+    plt.bar(xpos, accuracies, color=clrs)
     plt.xticks(xpos, algorithms)
     plt.show()
 
@@ -201,10 +206,10 @@ def build_confusion_matrix(Y_test, Y_pred, title):
 
 
 def filter_feateres_from_X(X_train_validation, X_test, set):
-    filtered_X_train_validation = [[0]]*len(X_train_validation)
+    filtered_X_train_validation = [[0]] * len(X_train_validation)
     filtered_X_test = [[0]] * len(X_test)
     for index in set:
-        filtered_X_train_validation = np.hstack((filtered_X_train_validation, X_train_validation[:, index:index+1]))
+        filtered_X_train_validation = np.hstack((filtered_X_train_validation, X_train_validation[:, index:index + 1]))
         filtered_X_test = np.hstack((filtered_X_test, X_test[:, index:index + 1]))
     filtered_X_train_validation = np.delete(filtered_X_train_validation, 0, 1)
     filtered_X_test = np.delete(filtered_X_test, 0, 1)
@@ -216,16 +221,19 @@ def findsubsets(array, subsetSize):
 
 
 def best_subset_features(X_train_validation, X_test, Y_train_validation, Y_test, labels):
+    print('Running Naive select featurs algorithm...')
     features = np.arange(len(labels))
     accuracies = []
     global_max_accuracy_sets = []
-    for i in range(1, len(features)+1):
+    for i in range(1, len(features) + 1):
         max_accuracy = 0
         max_accuracy_set = ()
         sets = findsubsets(features, i)
         for set in sets:
-            filtered_X_train_validation, filtered_X_test = filter_feateres_from_X(X_train_validation.copy(), X_test.copy(), set)
-            accuracy_Random_Forest = Random_Forest(filtered_X_train_validation, filtered_X_test, Y_train_validation, Y_test)
+            filtered_X_train_validation, filtered_X_test = filter_feateres_from_X(X_train_validation.copy(),
+                                                                                  X_test.copy(), set)
+            accuracy_Random_Forest = Random_Forest(filtered_X_train_validation, filtered_X_test, Y_train_validation,
+                                                   Y_test, False)
             if accuracy_Random_Forest > max_accuracy:
                 max_accuracy = accuracy_Random_Forest
                 max_accuracy_set = set
@@ -259,9 +267,10 @@ if __name__ == '__main__':
     # RFE
     # RFE_alg(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(), Y_test.copy())
 
-    # Select best K features
-    # select_best_k(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
-    #               Y_test.copy())
+    # Mutual information
+    # mutual_information_alg(X_train_validation.copy(), X_test.copy(), Y_train_validation.copy(),
+    #                        Y_test.copy())
 
+    # Naive select featurs algorithm
     # best_subset_features(X_train_validation.copy(), X_test.copy(),
     #                      Y_train_validation.copy(), Y_test.copy(), labels)
